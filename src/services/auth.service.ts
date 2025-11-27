@@ -1,7 +1,6 @@
 import z from "zod";
 import { BaseService } from "./base.service";
 import type { Response } from "../types";
-import { redirect } from "react-router-dom";
 import { UserService } from "./user.service";
 import { useAuth } from "../hooks/useAuth";
 
