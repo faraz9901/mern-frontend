@@ -1,36 +1,41 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import MainLayout from "./layouts/MainLayout";
-import { Home } from "lucide-react";
 import Edit from "./pages/Edit";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
+import { AuthService } from "./services/auth.service";
 
 export const router = createBrowserRouter([
   {
+    path: "/",
     element: <MainLayout />,
     children: [
-      { path: "/", element: <Home /> },
-      { path: "/edit", element: <Edit /> },
+      { index: true, element: <Home /> },
+      { path: "edit", element: <Edit /> },
     ],
-    loader: () => { }
+    loader: () => AuthService.checkSession("dashboard"),
   },
   {
     path: "/login",
-    element: <Login />
+    element: <Login />,
+    loader: () => AuthService.checkSession("login"),
   },
   {
     path: "/register",
-    element: <Register />
-  }
+    element: <Register />,
+    loader: () => AuthService.checkSession("register"),
+  },
 ]);
-
-
 
 function App() {
   return (
-    <RouterProvider router={router} />
-  )
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </>
+  );
 }
 
-export default App
+export default App;

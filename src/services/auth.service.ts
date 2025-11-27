@@ -1,6 +1,9 @@
 import z from "zod";
 import { BaseService } from "./base.service";
 import type { Response } from "../types";
+import { redirect } from "react-router-dom";
+import { UserService } from "./user.service";
+import { useAuth } from "../hooks/useAuth";
 
 export interface User {
     id: string;
@@ -84,5 +87,32 @@ export class AuthService extends BaseService {
 
     static async logout() {
         await this.api.post("/api/auth/logout");
+    }
+
+
+    static async checkSession(route: "login" | "register" | "dashboard") {
+        try {
+            const data = await UserService.getMe();
+
+            if (data.success) {
+                // ✅ update Zustand
+                useAuth.getState().setUser(data.content);
+
+                if (route !== "dashboard") {
+                    // user is logged in but trying to access login/register
+                    throw redirect("/"); // ✅ redirect from loader
+                }
+            } else {
+                useAuth.getState().setUser(null);
+                if (route === "dashboard") {
+                    throw redirect("/login");
+                }
+            }
+        } catch (err) {
+            if (route === "dashboard") {
+                useAuth.getState().setUser(null);
+                throw redirect("/login");
+            }
+        }
     }
 }

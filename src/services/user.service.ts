@@ -1,5 +1,7 @@
 import z from "zod";
 import { BaseService } from "./base.service";
+import type { User } from "./auth.service";
+import type { Response } from "../types";
 
 export class UserService extends BaseService {
 
@@ -9,7 +11,7 @@ export class UserService extends BaseService {
         address: z.string().optional(),
     })
 
-    static async getMe() {
+    static async getMe(): Promise<Response<User>> {
         const { data } = await this.api.get("/api/user/me");
         return data
     }
