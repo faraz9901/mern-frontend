@@ -11,8 +11,7 @@ type ProfileForm = {
 };
 
 function Edit() {
-  const user = useAuth((state) => state.user);
-  const refreshUser = useAuth((state) => state.refreshUser);
+  const { user, refreshUser } = useAuth();
   const [form, setForm] = useState<ProfileForm>({
     firstname: "",
     lastname: "",
@@ -21,9 +20,7 @@ function Edit() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      return;
-    }
+    if (!user) return;
     setForm({
       firstname: user.firstname || "",
       lastname: user.lastname || "",
@@ -61,10 +58,10 @@ function Edit() {
 
   if (!user) {
     return (
-      <div className="rounded-3xl border border-dashed border-slate-700 bg-slate-900/50 p-6 text-sm text-slate-300">
+      <div className="rounded-3xl border border-dashed border-slate-700 bg-slate-900/50 p-4 md:p-6 text-sm text-slate-300">
         <p className="text-base font-semibold text-white">Please log in to edit your profile.</p>
         <p className="mt-2 text-slate-400">
-          This page allows you to adjust the values that are stored encrypted in the database.
+          This page allows you to adjust encrypted information stored in the database.
         </p>
         <Link
           to="/login"
@@ -77,22 +74,23 @@ function Edit() {
   }
 
   return (
-    <section className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+    <section className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/60 p-4 md:p-6">
       <header>
         <p className="text-xs uppercase tracking-[0.5em] text-slate-500">Edit profile</p>
-        <h2 className="text-2xl font-semibold text-white">Keep your details accurate</h2>
-        <p className="text-sm text-slate-400">
-          The backend encrypts every field before persisting it, so this form is your safe window into that data.
-        </p>
+        <h2 className="text-xl md:text-2xl font-semibold text-white">
+          Keep your details accurate
+        </h2>
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         <label className="block text-sm font-medium text-slate-200">
           First name
           <input
             className="mt-1 w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-700"
             value={form.firstname}
-            onChange={(event) => setForm((prev) => ({ ...prev, firstname: event.target.value }))}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, firstname: event.target.value }))
+            }
             required
           />
         </label>
@@ -102,7 +100,9 @@ function Edit() {
           <input
             className="mt-1 w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-700"
             value={form.lastname}
-            onChange={(event) => setForm((prev) => ({ ...prev, lastname: event.target.value }))}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, lastname: event.target.value }))
+            }
           />
         </label>
 
@@ -111,21 +111,24 @@ function Edit() {
           <input
             className="mt-1 w-full rounded-2xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-700"
             value={form.address}
-            onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, address: event.target.value }))
+            }
           />
         </label>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             type="submit"
             disabled={isSaving}
-            className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full sm:w-auto rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSaving ? "Saving…" : "Save changes"}
           </button>
+
           <Link
             to="/"
-            className="rounded-2xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
+            className="w-full sm:w-auto rounded-2xl border border-slate-700 px-4 py-2 text-sm text-center font-semibold text-slate-200 transition hover:border-slate-500"
           >
             Back to dashboard
           </Link>

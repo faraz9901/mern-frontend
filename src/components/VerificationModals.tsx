@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 type EmailOtpDialogProps = {
   title: string;
@@ -59,7 +60,7 @@ function EmailOtpDialog({
               type="email"
               className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              readOnly
               required
               autoComplete="email"
             />
@@ -69,7 +70,7 @@ function EmailOtpDialog({
             <input
               type="text"
               inputMode="numeric"
-              pattern="\\d*"
+              pattern="[0-9]{6}"
               maxLength={6}
               className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm tracking-[0.2em] text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-300"
               value={otp}
@@ -109,11 +110,13 @@ function EmailOtpDialog({
 }
 
 export function VerifyEmailModal() {
-  const { redirectEmail, verifyEmail, clearRedirectState } = useAuth((state) => ({
-    redirectEmail: state.redirectEmail,
-    verifyEmail: state.verifyEmail,
-    clearRedirectState: state.clearRedirectState,
-  }));
+  const { redirectEmail, verifyEmail, clearRedirectState } = useAuth();
+  const navigate = useNavigate();
+
+  const onSubmit = async (email: string, otp: string) => {
+    await verifyEmail(email, otp);
+    navigate("/");
+  };
 
   return (
     <EmailOtpDialog
@@ -121,18 +124,20 @@ export function VerifyEmailModal() {
       description="Enter the six-digit code we just sent to your inbox so we can confirm it belongs to you."
       submitLabel="Confirm email"
       defaultEmail={redirectEmail ?? ""}
-      onSubmit={verifyEmail}
+      onSubmit={onSubmit}
       onCancel={clearRedirectState}
     />
   );
 }
 
 export function VerifyTwoFactorModal() {
-  const { redirectEmail, verifyTwoFactor, clearRedirectState } = useAuth((state) => ({
-    redirectEmail: state.redirectEmail,
-    verifyTwoFactor: state.verifyTwoFactor,
-    clearRedirectState: state.clearRedirectState,
-  }));
+  const { redirectEmail, verifyTwoFactor, clearRedirectState } = useAuth();
+  const navigate = useNavigate();
+
+  const onSubmit = async (email: string, otp: string) => {
+    await verifyTwoFactor(email, otp);
+    navigate("/");
+  };
 
   return (
     <EmailOtpDialog
@@ -140,7 +145,7 @@ export function VerifyTwoFactorModal() {
       description="We sent a one-time code to your email to finish signing you in."
       submitLabel="Verify and continue"
       defaultEmail={redirectEmail ?? ""}
-      onSubmit={verifyTwoFactor}
+      onSubmit={onSubmit}
       onCancel={clearRedirectState}
     />
   );

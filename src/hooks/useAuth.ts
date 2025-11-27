@@ -10,6 +10,7 @@ interface AuthState {
     register: (formData: RegisterSchema) => Promise<void>;
     verifyEmail: (email: string, otp: string) => Promise<void>;
     verifyTwoFactor: (email: string, otp: string) => Promise<void>;
+    sendVerifyEmail: (email: string) => Promise<void>;
     logout: () => void;
     redirectTo: "verify-email" | "verify-2fa" | null
     redirectEmail: string | null;
@@ -19,7 +20,7 @@ interface AuthState {
 }
 
 
-export const useAuth = create<AuthState>((set) => ({
+export const useAuth = create<AuthState>((set, get) => ({
     user: null,
     login: async (email: string, password: string) => {
         try {
@@ -33,6 +34,8 @@ export const useAuth = create<AuthState>((set) => ({
 
             toast.success(data.message);
 
+
+
             if (user.twoFactorEnabled) {
                 set({ redirectTo: "verify-2fa", redirectEmail: email, user: null });
             } else {
@@ -42,7 +45,10 @@ export const useAuth = create<AuthState>((set) => ({
         } catch (error) {
             const errorMessage = AuthService.getMessage(error);
             if (errorMessage.includes("Please verify your email")) {
+                await get().sendVerifyEmail(email);
+                toast.success("Please check your email to verify your account.");
                 set({ redirectTo: "verify-email", redirectEmail: email });
+                return
             }
             toast.error(errorMessage)
         }
@@ -88,6 +94,19 @@ export const useAuth = create<AuthState>((set) => ({
             toast.success(data.message);
 
             set({ user: data.content, redirectTo: null, redirectEmail: null });
+        } catch (error) {
+            const errorMessage = AuthService.getMessage(error);
+            toast.error(errorMessage);
+        }
+    },
+    sendVerifyEmail: async (email: string) => {
+        try {
+            const data = await AuthService.sendVerifyEmail(email);
+            if (!data.success) {
+                toast.error(data.message);
+                return
+            }
+            toast.success(data.message);
         } catch (error) {
             const errorMessage = AuthService.getMessage(error);
             toast.error(errorMessage);

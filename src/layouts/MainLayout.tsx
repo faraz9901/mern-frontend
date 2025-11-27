@@ -1,11 +1,22 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useEffect } from "react";
+import { AuthService } from "../services/auth.service";
 
 function MainLayout() {
-    const user = useAuth((state) => state.user);
-    const logout = useAuth((state) => state.logout);
-    const clearRedirectState = useAuth((state) => state.clearRedirectState);
+    const { user, logout, clearRedirectState, } = useAuth();
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        AuthService.checkSession(navigate, "dashboard");
+    }, []);
+
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/login");
+        }
+    }, [user]);
 
     const handleLogout = async () => {
         await logout();
@@ -14,38 +25,77 @@ function MainLayout() {
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-100">
+            {/* HEADER */}
             <header className="border-b border-slate-900/70 bg-slate-950/80 backdrop-blur-sm">
-                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-                    <div>
-                        <Link to="/" className="text-lg font-semibold text-white">
-                            Secure MERN
-                        </Link>
-                        <p className="text-xs text-slate-400">Session-backed, encrypted profiles</p>
-                    </div>
-                    <nav className="flex flex-1 items-center gap-3 text-sm">
+                <div className="
+                    mx-auto max-w-6xl
+                    flex flex-wrap items-center justify-between 
+                    gap-3 px-4 py-3
+                ">
+
+                    {/* NAVIGATION */}
+                    <nav className="
+                        flex flex-wrap items-center gap-2 
+                        text-xs sm:text-sm flex-1
+                    ">
                         <Link
                             to="/"
-                            className="rounded-2xl px-4 py-2 font-medium text-slate-200 transition hover:bg-slate-800 hover:text-white"
+                            className="
+                                rounded-xl px-3 py-2 
+                                text-slate-200 font-medium 
+                                transition hover:bg-slate-800 hover:text-white
+                            "
                         >
                             Dashboard
                         </Link>
+
                         <Link
                             to="/edit"
-                            className="rounded-2xl px-4 py-2 font-medium text-slate-200 transition hover:bg-slate-800 hover:text-white"
+                            className="
+                                rounded-xl px-3 py-2 
+                                text-slate-200 font-medium 
+                                transition hover:bg-slate-800 hover:text-white
+                            "
                         >
                             Edit profile
                         </Link>
                     </nav>
-                    <div className="flex items-center gap-3 text-sm">
+
+                    {/* AUTH / USER SECTION */}
+                    <div className="
+                        flex flex-wrap items-center justify-end 
+                        gap-2 text-xs sm:text-sm max-w-full
+                    ">
                         {user ? (
                             <>
-                                <span className="rounded-full border border-slate-800 px-3 py-1 text-xs uppercase tracking-widest text-slate-300">
+                                {/* 2FA badge */}
+                                <span className="
+                                    rounded-full border border-slate-800 
+                                    px-2.5 py-1 text-[10px] sm:text-xs 
+                                    uppercase tracking-widest text-slate-300
+                                ">
                                     {user.twoFactorEnabled ? "2FA On" : "2FA Off"}
                                 </span>
-                                <span className="truncate rounded-full bg-slate-900/60 px-3 py-1 text-xs">{user.email}</span>
+
+                                {/* Email */}
+                                <span className="
+                                    truncate max-w-[110px] sm:max-w-xs
+                                    rounded-full bg-slate-900/60
+                                    px-2.5 py-1 text-[10px] sm:text-xs
+                                ">
+                                    {user.email}
+                                </span>
+
+                                {/* Logout */}
                                 <button
                                     onClick={handleLogout}
-                                    className="rounded-2xl border border-slate-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:bg-slate-800"
+                                    className="
+                                        rounded-xl border border-slate-700 
+                                        px-3 py-1 text-[10px] sm:text-xs 
+                                        font-semibold uppercase tracking-wide 
+                                        text-slate-200 transition 
+                                        hover:bg-slate-800
+                                    "
                                 >
                                     Logout
                                 </button>
@@ -54,13 +104,24 @@ function MainLayout() {
                             <>
                                 <Link
                                     to="/login"
-                                    className="rounded-2xl border border-slate-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-slate-500"
+                                    className="
+                                        rounded-xl border border-slate-700 
+                                        px-3 py-1 text-[10px] sm:text-xs 
+                                        font-semibold uppercase tracking-wide 
+                                        text-slate-200 transition 
+                                        hover:border-slate-500
+                                    "
                                 >
                                     Login
                                 </Link>
                                 <Link
                                     to="/register"
-                                    className="rounded-2xl bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:bg-slate-700"
+                                    className="
+                                        rounded-xl bg-slate-800 px-3 py-1 
+                                        text-[10px] sm:text-xs font-semibold 
+                                        uppercase tracking-wide 
+                                        text-slate-200 transition hover:bg-slate-700
+                                    "
                                 >
                                     Register
                                 </Link>
@@ -70,7 +131,8 @@ function MainLayout() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-6xl px-4 py-10">
+            {/* MAIN CONTENT */}
+            <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
                 <Outlet />
             </main>
         </div>

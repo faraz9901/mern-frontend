@@ -67,8 +67,14 @@ export class AuthService extends BaseService {
         return data
     }
 
+    static async sendVerifyEmail(email: string): Promise<Response<null>> {
+        const validated = this.validate(z.email("Invalid email address"), email);
+        const { data } = await this.api.post("/api/auth/send-verify-email", { email: validated });
+        return data
+    }
 
-    static async verifyEmail(email: string, otp: string) {
+
+    static async verifyEmail(email: string, otp: string): Promise<Response<User>> {
         const validated = this.validate(otpMailSchema, { email, otp });
 
         const { data } = await this.api.post("/api/auth/verify-email", validated);
@@ -90,29 +96,33 @@ export class AuthService extends BaseService {
     }
 
 
-    static async checkSession(route: "login" | "register" | "dashboard") {
+    static async checkSession(navigate: (path: string) => void, route: "login" | "register" | "dashboard") {
         try {
+            console.log("check session");
             const data = await UserService.getMe();
 
-            if (data.success) {
-                // ✅ update Zustand
-                useAuth.getState().setUser(data.content);
+            useAuth.getState().setUser(data.content ?? null);
 
-                if (route !== "dashboard") {
-                    // user is logged in but trying to access login/register
-                    throw redirect("/"); // ✅ redirect from loader
-                }
-            } else {
+            if (!data.success) {
                 useAuth.getState().setUser(null);
                 if (route === "dashboard") {
-                    throw redirect("/login");
+                    navigate("/login");
+                    return
                 }
             }
-        } catch (err) {
+
+            if (data.success && route !== "dashboard") {
+                navigate("/");
+                return
+            }
+
+
+        } catch (e) {
+            useAuth.getState().setUser(null);
             if (route === "dashboard") {
-                useAuth.getState().setUser(null);
-                throw redirect("/login");
+                navigate("/login");
             }
         }
+
     }
 }

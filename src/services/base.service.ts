@@ -15,7 +15,10 @@ export class BaseService {
 
     public static api = axios.create({
         baseURL: AppConfig.apiUrl,
-        withCredentials: true
+        withCredentials: true,
+        headers: {
+            "Content-Type": "application/json",
+        }
     });
 
 
