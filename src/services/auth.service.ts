@@ -3,7 +3,7 @@ import { BaseService } from "./base.service";
 import type { Response } from "../types";
 
 export interface User {
-    _id: string;
+    id: string;
     email: string;
     firstname: string;
     lastname: string;
@@ -73,7 +73,7 @@ export class AuthService extends BaseService {
         return data
     }
 
-    static async verfiyTwoFactor(email: string, otp: string) {
+    static async verifyTwoFactor(email: string, otp: string) {
         const validated = this.validate(otpMailSchema, { email, otp });
 
         const { data } = await this.api.post("/api/auth/verify-2fa", validated);
